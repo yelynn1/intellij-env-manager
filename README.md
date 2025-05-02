@@ -87,8 +87,8 @@ The plugin is organized into the following packages:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yelynnkhant/env-manager.git
-   cd env-manager
+   git clone https://github.com/yelynn1/intellij-env-manager.git
+   cd intellij-env-manager
    ```
 
 2. Open the project in IntelliJ IDEA:
