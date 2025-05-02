@@ -6,6 +6,7 @@ import cloud.yelynn.envmanager.run.EnvironmentManagerService;
 import cloud.yelynn.envmanager.service.EnvironmentVariableService;
 import cloud.yelynn.envmanager.util.TextFileImporter;
 import cloud.yelynn.envmanager.util.TextFileExporter;
+import cloud.yelynn.envmanager.util.PropertiesFileScanner;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.components.ServiceManager;
@@ -119,6 +120,7 @@ public class EnvironmentManagerToolWindowContent {
         actionGroup.add(new EditVariableAction());
         actionGroup.add(new RemoveVariableAction());
         actionGroup.add(new ImportVariablesAction());
+        actionGroup.add(new ScanPropertiesFileAction());
         actionGroup.add(new ExportSetAction());
         actionGroup.addSeparator();
         actionGroup.add(new ActivateSetAction());
@@ -586,6 +588,90 @@ public class EnvironmentManagerToolWindowContent {
                                 project,
                                 "Environment variables imported successfully.",
                                 "Import Environment Variables");
+                    }
+                });
+            }
+        }
+    }
+
+    private class ScanPropertiesFileAction extends AnAction {
+        public ScanPropertiesFileAction() {
+            super("Scan Properties File", "Scan application.properties or application.yaml file", AllIcons.Actions.Find);
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(setsList.getSelectedValue() != null);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            EnvironmentVariableSet selectedSet = setsList.getSelectedValue();
+            if (selectedSet != null) {
+                FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
+                        .withTitle("Scan Properties File")
+                        .withDescription("Select an application.properties or application.yaml file")
+                        .withFileFilter(file -> {
+                            String extension = file.getExtension();
+                            return extension != null && (
+                                    extension.equalsIgnoreCase("properties") ||
+                                    extension.equalsIgnoreCase("yaml") ||
+                                    extension.equalsIgnoreCase("yml"));
+                        });
+
+                FileChooser.chooseFile(descriptor, project, null, file -> {
+                    java.io.File ioFile = VfsUtil.virtualToIoFile(file);
+                    List<EnvironmentVariable> scannedVariables = PropertiesFileScanner.scanFile(ioFile);
+
+                    if (scannedVariables.isEmpty()) {
+                        Messages.showWarningDialog(
+                                project,
+                                "No valid properties found in the selected file.",
+                                "Scan Properties File");
+                        return;
+                    }
+
+                    int result = Messages.showYesNoDialog(
+                            project,
+                            "Found " + scannedVariables.size() + " properties. Do you want to add them to the environment set?",
+                            "Scan Properties File",
+                            null);
+
+                    if (result == Messages.YES) {
+                        for (EnvironmentVariable variable : scannedVariables) {
+                            // Check if variable with same key already exists
+                            boolean exists = selectedSet.getVariables().stream()
+                                    .anyMatch(v -> v.getKey().equals(variable.getKey()));
+
+                            if (exists) {
+                                // Ask user if they want to overwrite
+                                int overwriteResult = Messages.showYesNoDialog(
+                                        project,
+                                        "Variable '" + variable.getKey() + "' already exists. Do you want to overwrite it?",
+                                        "Scan Properties File",
+                                        null);
+
+                                if (overwriteResult == Messages.YES) {
+                                    selectedSet.removeVariableByKey(variable.getKey());
+                                    selectedSet.addVariable(variable);
+                                }
+                            } else {
+                                selectedSet.addVariable(variable);
+                            }
+                        }
+
+                        environmentVariableService.updateSet(selectedSet);
+                        updateVariablesTable();
+
+                        Messages.showInfoMessage(
+                                project,
+                                "Properties added to environment set successfully.",
+                                "Scan Properties File");
                     }
                 });
             }
