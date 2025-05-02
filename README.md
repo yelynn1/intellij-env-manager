@@ -1,5 +1,7 @@
 # Environment Manager Plugin for IntelliJ IDEA
 
+[![JetBrains Plugin](https://img.shields.io/jetbrains/plugin/v/27264-env-manager.svg?label=JetBrains%20Plugin)](https://plugins.jetbrains.com/plugin/27264-env-manager)
+
 Environment Manager is an IntelliJ IDEA plugin that helps you manage environment variables for your run configurations. It allows you to create multiple sets of environment variables (e.g., development, staging, production) and easily switch between them.
 
 ## Features
