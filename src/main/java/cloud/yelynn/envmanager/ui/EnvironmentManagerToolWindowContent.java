@@ -180,11 +180,14 @@ public class EnvironmentManagerToolWindowContent {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             EnvironmentVariable variable = variables.get(rowIndex);
-            return switch (columnIndex) {
-                case 0 -> variable.getKey();
-                case 1 -> variable.getValue();
-                default -> null;
-            };
+            switch (columnIndex) {
+                case 0:
+                    return variable.getKey();
+                case 1:
+                    return variable.getValue();
+                default:
+                    return null;
+            }
         }
     }
 

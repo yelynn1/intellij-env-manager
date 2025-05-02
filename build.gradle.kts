@@ -29,7 +29,8 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "242"
+            sinceBuild = "233"  // 2023.3
+            untilBuild = provider { null }   // This removes the upper version limit
         }
 
         changeNotes = """
@@ -38,13 +39,14 @@ intellijPlatform {
     }
 }
 
+
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "21"
+        kotlinOptions.jvmTarget = "1.8"
     }
 }
