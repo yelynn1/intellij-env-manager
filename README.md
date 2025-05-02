@@ -4,7 +4,7 @@ Environment Manager is an IntelliJ IDEA plugin that helps you manage environment
 
 ## Features
 
-- Create, edit, and delete environment variable sets
+- Create, edit, clone, and delete environment variable sets
 - Add, edit, and remove environment variables within each set
 - Import environment variables from text files (KEY=VALUE format)
 - Activate a specific set to inject its environment variables into run configurations
@@ -42,8 +42,11 @@ Environment Manager is an IntelliJ IDEA plugin that helps you manage environment
    - Click the "Import Variables" button
    - Select a text file with environment variables in KEY=VALUE format (one per line)
    - Confirm the import and handle any duplicate variables
-6. Activate a set by selecting it and clicking the "Activate Set" button
-7. Run your application - the environment variables from the active set will be injected into the run configuration
+6. Clone an existing set by selecting it and clicking the "Clone Set" button:
+   - This creates a copy of the selected set with all its variables
+   - The new set will be named "Copy of [original set name]"
+7. Activate a set by selecting it and clicking the "Activate Set" button
+8. Run your application - the environment variables from the active set will be injected into the run configuration
 
 ## Project Structure
 

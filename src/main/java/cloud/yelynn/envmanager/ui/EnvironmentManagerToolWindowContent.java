@@ -112,6 +112,7 @@ public class EnvironmentManagerToolWindowContent {
         actionGroup.add(new AddSetAction());
         actionGroup.add(new EditSetAction());
         actionGroup.add(new RemoveSetAction());
+        actionGroup.add(new CloneSetAction());
         actionGroup.addSeparator();
         actionGroup.add(new AddVariableAction());
         actionGroup.add(new EditVariableAction());
@@ -279,6 +280,44 @@ public class EnvironmentManagerToolWindowContent {
                     loadSets();
                     updateVariablesTable();
                 }
+            }
+        }
+    }
+
+    private class CloneSetAction extends AnAction {
+        public CloneSetAction() {
+            super("Clone Set", "Create a copy of the selected environment variable set", AllIcons.Actions.Copy);
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(setsList.getSelectedValue() != null);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            EnvironmentVariableSet selectedSet = setsList.getSelectedValue();
+            if (selectedSet != null) {
+                // Create a new set with a copy of the name
+                String newName = "Copy of " + selectedSet.getName();
+                EnvironmentVariableSet newSet = new EnvironmentVariableSet(newName);
+
+                // Copy all variables from the selected set
+                for (EnvironmentVariable variable : selectedSet.getVariables()) {
+                    newSet.addVariable(new EnvironmentVariable(variable.getKey(), variable.getValue()));
+                }
+
+                // Add the new set to the service
+                environmentVariableService.addSet(newSet);
+
+                // Refresh the UI
+                loadSets();
+                setsList.setSelectedValue(newSet, true);
             }
         }
     }
