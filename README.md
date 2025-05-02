@@ -104,6 +104,30 @@ The plugin is organized into the following packages:
    - From the terminal: `./gradlew runIde`
    - Or use the "Run Plugin" run configuration in IntelliJ IDEA
 
+## Continuous Integration
+
+This project uses GitHub Actions for continuous integration. The CI pipeline automatically builds the project and runs tests on every push to the main branch and on pull requests.
+
+### CI Workflow
+
+The CI workflow includes the following steps:
+1. Check out the code
+2. Set up JDK 11
+3. Build the project with Gradle
+4. Run tests
+5. Upload test results as artifacts
+
+You can view the CI workflow configuration in the `.github/workflows/build.yml` file.
+
+### Running Tests Locally
+
+To run the tests locally:
+```
+./gradlew test
+```
+
+Test reports are generated in the `build/reports/tests/test` directory.
+
 ## Building from Source
 
 To build the plugin from source:
