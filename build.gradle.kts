@@ -24,6 +24,10 @@ dependencies {
         // Add necessary plugin dependencies for compilation here, example:
         bundledPlugin("com.intellij.java")
     }
+
+    // JUnit 5 dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
 intellijPlatform {
@@ -48,5 +52,13 @@ tasks {
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
+    }
+
+    // Configure test task to use JUnit 5
+    test {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
     }
 }

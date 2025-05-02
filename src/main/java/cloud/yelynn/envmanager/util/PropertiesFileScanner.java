@@ -27,11 +27,17 @@ public class PropertiesFileScanner {
     public static List<EnvironmentVariable> scanPropertiesFile(File file) {
         List<EnvironmentVariable> variables = new ArrayList<>();
 
+        // Check if file exists before trying to read it
+        if (!file.exists() || !file.isFile()) {
+            LOG.warn("Properties file does not exist or is not a file: " + file.getPath());
+            return variables;
+        }
+
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                
+
                 // Skip empty lines and comments
                 if (line.isEmpty() || line.startsWith("#")) {
                     continue;
@@ -42,11 +48,11 @@ public class PropertiesFileScanner {
                 if (separatorIndex <= 0) {
                     separatorIndex = line.indexOf(':');
                 }
-                
+
                 if (separatorIndex > 0) {
                     String key = line.substring(0, separatorIndex).trim();
                     String value = line.substring(separatorIndex + 1).trim();
-                    
+
                     if (!key.isEmpty()) {
                         variables.add(new EnvironmentVariable(key, value));
                     }
@@ -71,28 +77,34 @@ public class PropertiesFileScanner {
         List<EnvironmentVariable> variables = new ArrayList<>();
         Map<String, String> flattenedProperties = new HashMap<>();
 
+        // Check if file exists before trying to read it
+        if (!file.exists() || !file.isFile()) {
+            LOG.warn("YAML file does not exist or is not a file: " + file.getPath());
+            return variables;
+        }
+
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             int currentIndentation = 0;
             List<String> currentPath = new ArrayList<>();
-            
+
             while ((line = reader.readLine()) != null) {
                 // Skip empty lines and comments
                 if (line.trim().isEmpty() || line.trim().startsWith("#")) {
                     continue;
                 }
-                
+
                 // Calculate indentation level
                 int indentation = 0;
                 while (indentation < line.length() && line.charAt(indentation) == ' ') {
                     indentation++;
                 }
-                
+
                 // Skip if line is only whitespace
                 if (indentation == line.length()) {
                     continue;
                 }
-                
+
                 // Adjust current path based on indentation
                 if (indentation < currentIndentation) {
                     int levelsToRemove = (currentIndentation - indentation) / 2;
@@ -100,17 +112,17 @@ public class PropertiesFileScanner {
                         currentPath.remove(currentPath.size() - 1);
                     }
                 }
-                
+
                 currentIndentation = indentation;
                 String trimmedLine = line.trim();
-                
+
                 // Parse key-value pair
                 int separatorIndex = trimmedLine.indexOf(':');
                 if (separatorIndex > 0) {
                     String key = trimmedLine.substring(0, separatorIndex).trim();
                     String value = separatorIndex < trimmedLine.length() - 1 ? 
                                   trimmedLine.substring(separatorIndex + 1).trim() : "";
-                    
+
                     if (!value.isEmpty()) {
                         // This is a key-value pair
                         StringBuilder fullKey = new StringBuilder();
@@ -118,7 +130,7 @@ public class PropertiesFileScanner {
                             fullKey.append(pathPart).append(".");
                         }
                         fullKey.append(key);
-                        
+
                         flattenedProperties.put(fullKey.toString(), value);
                     } else {
                         // This is a nested structure
@@ -126,12 +138,12 @@ public class PropertiesFileScanner {
                     }
                 }
             }
-            
+
             // Convert flattened properties to environment variables
             for (Map.Entry<String, String> entry : flattenedProperties.entrySet()) {
                 variables.add(new EnvironmentVariable(entry.getKey(), entry.getValue()));
             }
-            
+
         } catch (IOException e) {
             LOG.error("Error reading YAML file: " + file.getPath(), e);
         }

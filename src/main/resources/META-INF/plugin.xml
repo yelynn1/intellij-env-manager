@@ -32,7 +32,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <!-- Tool Window -->
-        <toolWindow id="Environment Manager" 
+        <toolWindow id="Environment Variable Manager"
                     anchor="right" 
                     factoryClass="cloud.yelynn.envmanager.ui.EnvironmentManagerToolWindowFactory"
                     icon="AllIcons.General.Settings"/>
