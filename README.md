@@ -112,7 +112,7 @@ This project uses GitHub Actions for continuous integration. The CI pipeline aut
 
 The CI workflow includes the following steps:
 1. Check out the code
-2. Set up JDK 11
+2. Set up JDK 17 (required for compatibility with the IntelliJ Platform Gradle plugin)
 3. Build the project with Gradle
 4. Run tests
 5. Upload test results as artifacts
