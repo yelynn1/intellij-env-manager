@@ -5,10 +5,10 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Env-manager</name>
+    <name>Environment Variable Manager</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor url="https://github.com/yelynnkhant">Ye Lynn Khant</vendor>
+    <vendor url="https://github.com/yelynn1">Ye Lynn Khant</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
@@ -17,6 +17,8 @@
     <ul>
       <li>Create, edit, and delete environment variable sets (e.g., dev, staging, prod)</li>
       <li>Add and remove environment variables to each set</li>
+      <li>Import and export environment variable sets</li>
+      <li>Scan the project for environment variables from *.properties or *.yaml</li>
       <li>Activate a set to inject its environment variables into run configurations</li>
     </ul>
   ]]></description>
