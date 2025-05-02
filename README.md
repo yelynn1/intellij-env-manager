@@ -6,6 +6,7 @@ Environment Manager is an IntelliJ IDEA plugin that helps you manage environment
 
 - Create, edit, and delete environment variable sets
 - Add, edit, and remove environment variables within each set
+- Import environment variables from text files (KEY=VALUE format)
 - Activate a specific set to inject its environment variables into run configurations
 - Persistent storage of environment variable sets between IDE restarts
 - Simple and intuitive UI integrated into the IDE
@@ -36,8 +37,13 @@ Environment Manager is an IntelliJ IDEA plugin that helps you manage environment
 2. Create a new environment variable set by clicking the "Add Set" button
 3. Add environment variables to the set by selecting it and clicking the "Add Variable" button
 4. Enter the key and value for each environment variable
-5. Activate a set by selecting it and clicking the "Activate Set" button
-6. Run your application - the environment variables from the active set will be injected into the run configuration
+5. Alternatively, import environment variables from a text file:
+   - Select an environment variable set
+   - Click the "Import Variables" button
+   - Select a text file with environment variables in KEY=VALUE format (one per line)
+   - Confirm the import and handle any duplicate variables
+6. Activate a set by selecting it and clicking the "Activate Set" button
+7. Run your application - the environment variables from the active set will be injected into the run configuration
 
 ## Project Structure
 
@@ -47,6 +53,7 @@ The plugin is organized into the following packages:
 - `cloud.yelynn.envmanager.service`: Contains the service for managing and persisting environment variable sets
 - `cloud.yelynn.envmanager.ui`: Contains the UI components for the plugin
 - `cloud.yelynn.envmanager.run`: Contains the components for integrating with IntelliJ's run configuration system
+- `cloud.yelynn.envmanager.util`: Contains utility classes for various functionality
 
 ### Key Components
 
@@ -56,6 +63,7 @@ The plugin is organized into the following packages:
 - `EnvironmentManagerToolWindowFactory`: Factory for creating the Environment Manager tool window
 - `EnvironmentManagerToolWindowContent`: Content for the Environment Manager tool window
 - `EnvironmentManagerService`: Service that injects environment variables into run configurations
+- `TextFileImporter`: Utility class for importing environment variables from text files
 
 ## Development Setup
 

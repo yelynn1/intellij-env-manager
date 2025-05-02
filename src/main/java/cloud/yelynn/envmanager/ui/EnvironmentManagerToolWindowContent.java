@@ -4,6 +4,7 @@ import cloud.yelynn.envmanager.model.EnvironmentVariable;
 import cloud.yelynn.envmanager.model.EnvironmentVariableSet;
 import cloud.yelynn.envmanager.run.EnvironmentManagerService;
 import cloud.yelynn.envmanager.service.EnvironmentVariableService;
+import cloud.yelynn.envmanager.util.TextFileImporter;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.components.ServiceManager;
@@ -13,6 +14,9 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
@@ -112,6 +116,7 @@ public class EnvironmentManagerToolWindowContent {
         actionGroup.add(new AddVariableAction());
         actionGroup.add(new EditVariableAction());
         actionGroup.add(new RemoveVariableAction());
+        actionGroup.add(new ImportVariablesAction());
         actionGroup.addSeparator();
         actionGroup.add(new ActivateSetAction());
 
@@ -461,6 +466,84 @@ public class EnvironmentManagerToolWindowContent {
                     environmentVariableService.updateSet(selectedSet);
                     updateVariablesTable();
                 }
+            }
+        }
+    }
+
+    private class ImportVariablesAction extends AnAction {
+        public ImportVariablesAction() {
+            super("Import Variables", "Import environment variables from a text file", AllIcons.Actions.MenuOpen);
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(setsList.getSelectedValue() != null);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            EnvironmentVariableSet selectedSet = setsList.getSelectedValue();
+            if (selectedSet != null) {
+                FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
+                        .withTitle("Import Environment Variables")
+                        .withDescription("Select a text file with environment variables (KEY=VALUE format)");
+//                        .withFileFilter(file -> file.getExtension() != null && file.getExtension().equalsIgnoreCase("txt"));
+
+                FileChooser.chooseFile(descriptor, project, null, file -> {
+                    java.io.File ioFile = VfsUtil.virtualToIoFile(file);
+                    List<EnvironmentVariable> importedVariables = TextFileImporter.importFromFile(ioFile);
+
+                    if (importedVariables.isEmpty()) {
+                        Messages.showWarningDialog(
+                                project,
+                                "No valid environment variables found in the selected file.",
+                                "Import Environment Variables");
+                        return;
+                    }
+
+                    int result = Messages.showYesNoDialog(
+                            project,
+                            "Found " + importedVariables.size() + " environment variables. Do you want to import them?",
+                            "Import Environment Variables",
+                            null);
+
+                    if (result == Messages.YES) {
+                        for (EnvironmentVariable variable : importedVariables) {
+                            // Check if variable with same key already exists
+                            boolean exists = selectedSet.getVariables().stream()
+                                    .anyMatch(v -> v.getKey().equals(variable.getKey()));
+
+                            if (exists) {
+                                // Ask user if they want to overwrite
+                                int overwriteResult = Messages.showYesNoDialog(
+                                        project,
+                                        "Variable '" + variable.getKey() + "' already exists. Do you want to overwrite it?",
+                                        "Import Environment Variables",
+                                        null);
+
+                                if (overwriteResult == Messages.YES) {
+                                    selectedSet.removeVariableByKey(variable.getKey());
+                                    selectedSet.addVariable(variable);
+                                }
+                            } else {
+                                selectedSet.addVariable(variable);
+                            }
+                        }
+
+                        environmentVariableService.updateSet(selectedSet);
+                        updateVariablesTable();
+
+                        Messages.showInfoMessage(
+                                project,
+                                "Environment variables imported successfully.",
+                                "Import Environment Variables");
+                    }
+                });
             }
         }
     }
