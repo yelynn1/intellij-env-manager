@@ -2,6 +2,7 @@ package cloud.yelynn.envmanager.ui;
 
 import cloud.yelynn.envmanager.model.EnvironmentVariable;
 import cloud.yelynn.envmanager.model.EnvironmentVariableSet;
+import cloud.yelynn.envmanager.run.EnvironmentManagerService;
 import cloud.yelynn.envmanager.service.EnvironmentVariableService;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -34,6 +35,7 @@ public class EnvironmentManagerToolWindowContent {
     private final Project project;
     private final ToolWindow toolWindow;
     private final EnvironmentVariableService environmentVariableService;
+    private final EnvironmentManagerService environmentManagerService;
 
     private JPanel mainPanel;
     private JBList<EnvironmentVariableSet> setsList;
@@ -45,6 +47,7 @@ public class EnvironmentManagerToolWindowContent {
         this.project = project;
         this.toolWindow = toolWindow;
         this.environmentVariableService = project.getService(EnvironmentVariableService.class);
+        this.environmentManagerService = project.getService(EnvironmentManagerService.class);
 
         createUI();
     }
@@ -63,6 +66,30 @@ public class EnvironmentManagerToolWindowContent {
         setsList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 updateVariablesTable();
+            }
+        });
+
+        // Set custom cell renderer to show active set
+        setsList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (value instanceof EnvironmentVariableSet) {
+                    EnvironmentVariableSet set = (EnvironmentVariableSet) value;
+                    Optional<EnvironmentVariableSet> activeSet = environmentVariableService.getActiveSet();
+                    boolean isActive = activeSet.isPresent() && activeSet.get().getId().equals(set.getId());
+
+                    if (isActive) {
+                        setText(set.getName() + " (active)");
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else {
+                        setText(set.getName());
+                        setFont(getFont().deriveFont(Font.PLAIN));
+                    }
+                }
+
+                return renderer;
             }
         });
 
@@ -451,8 +478,9 @@ public class EnvironmentManagerToolWindowContent {
         @Override
         public void update(@NotNull AnActionEvent e) {
             e.getPresentation().setEnabled(setsList.getSelectedValue() != null);
-
             EnvironmentVariableSet selectedSet = setsList.getSelectedValue();
+
+            environmentManagerService.injectEnvironmentVariables(selectedSet);
             if (selectedSet != null) {
                 Optional<EnvironmentVariableSet> activeSet = environmentVariableService.getActiveSet();
                 boolean isActive = activeSet.isPresent() && activeSet.get().getId().equals(selectedSet.getId());
@@ -480,6 +508,10 @@ public class EnvironmentManagerToolWindowContent {
                             "Environment variable set '" + selectedSet.getName() + "' has been activated.",
                             "Environment Variable Set Activated");
                 }
+
+                // Refresh the list to update the active set display
+                loadSets();
+                setsList.setSelectedValue(selectedSet, true);
 
                 // Refresh the action's presentation
                 e.getPresentation().setText(isActive ? "Activate Set" : "Deactivate Set");

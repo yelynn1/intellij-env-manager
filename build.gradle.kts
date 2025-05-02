@@ -22,7 +22,7 @@ dependencies {
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add necessary plugin dependencies for compilation here, example:
-        // bundledPlugin("com.intellij.java")
+        bundledPlugin("com.intellij.java")
     }
 }
 

@@ -1,0 +1,12 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="org.jetbrains.plugins.terminal" revision="IC-242.24807.4"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="terminal" ext="jar" conf="default" url="plugins/terminal/lib"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledPlugin" name="com.jetbrains.sh" rev="IC-242.24807.4"/>
+  </dependencies>
+</ivy-module>

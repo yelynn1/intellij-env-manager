@@ -1,0 +1,13 @@
+<ivy-module version="2.0">
+  <info organisation="bundledModule" module="intellij.platform.collaborationTools" revision="IC-242.24807.4"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="intellij.platform.collaborationTools" ext="jar" conf="default" url="lib/modules"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledModule" name="intellij.platform.vcs.dvcs.impl" rev="IC-242.24807.4"/>
+    <dependency org="bundledModule" name="intellij.platform.vcs.log.impl" rev="IC-242.24807.4"/>
+  </dependencies>
+</ivy-module>
