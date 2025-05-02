@@ -5,6 +5,7 @@ import cloud.yelynn.envmanager.model.EnvironmentVariableSet;
 import cloud.yelynn.envmanager.run.EnvironmentManagerService;
 import cloud.yelynn.envmanager.service.EnvironmentVariableService;
 import cloud.yelynn.envmanager.util.TextFileImporter;
+import cloud.yelynn.envmanager.util.TextFileExporter;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.components.ServiceManager;
@@ -118,6 +119,7 @@ public class EnvironmentManagerToolWindowContent {
         actionGroup.add(new EditVariableAction());
         actionGroup.add(new RemoveVariableAction());
         actionGroup.add(new ImportVariablesAction());
+        actionGroup.add(new ExportSetAction());
         actionGroup.addSeparator();
         actionGroup.add(new ActivateSetAction());
 
@@ -581,6 +583,54 @@ public class EnvironmentManagerToolWindowContent {
                                 project,
                                 "Environment variables imported successfully.",
                                 "Import Environment Variables");
+                    }
+                });
+            }
+        }
+    }
+
+    private class ExportSetAction extends AnAction {
+        public ExportSetAction() {
+            super("Export Set", "Export environment variables to a text file", AllIcons.Actions.MenuSaveall);
+        }
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(setsList.getSelectedValue() != null);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            EnvironmentVariableSet selectedSet = setsList.getSelectedValue();
+            if (selectedSet != null) {
+                // Create a file chooser descriptor for saving files
+                FileChooserDescriptor descriptor = new FileChooserDescriptor(false, true, false, false, false, false)
+                        .withTitle("Export Environment Variables")
+                        .withDescription("Select a directory to save the environment variables file");
+
+                FileChooser.chooseFile(descriptor, project, null, directory -> {
+                    // Create a file in the selected directory with the set name
+                    String fileName = selectedSet.getName().replaceAll("[^a-zA-Z0-9.-]", "_") + ".env";
+                    java.io.File file = new java.io.File(VfsUtil.virtualToIoFile(directory), fileName);
+
+                    // Export the variables to the file
+                    boolean success = TextFileExporter.exportToFile(selectedSet, file);
+
+                    if (success) {
+                        Messages.showInfoMessage(
+                                project,
+                                "Environment variables exported successfully to " + file.getPath(),
+                                "Export Environment Variables");
+                    } else {
+                        Messages.showErrorDialog(
+                                project,
+                                "Failed to export environment variables to " + file.getPath(),
+                                "Export Environment Variables");
                     }
                 });
             }
